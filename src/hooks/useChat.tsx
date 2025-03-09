@@ -47,7 +47,7 @@ export const useChat = () => {
     }));
   }, []);
 
-  // Process the AI response to make it more concise
+  // Process the AI response to make it more concise and customer support-like
   const simplifyResponse = (response: string): string => {
     // Remove any lengthy introductions
     let simplified = response.replace(/^(Hello!|Hi there!|Greetings!|Sure,|Of course,|Certainly,)[^.]*\./i, '');
@@ -58,12 +58,30 @@ export const useChat = () => {
     // Remove excessive sign-offs
     simplified = simplified.replace(/(Is there anything else|Do you have any other questions|Let me know if you need|Feel free to ask)[^.]*\.$/gi, '');
     
+    // Remove explanatory phrasing
+    simplified = simplified.replace(/(let me explain|to explain|I'll explain|as you know|as you may know|it's worth noting that|it's important to note that)[^.]*\./gi, '');
+    
+    // Remove first-person perspective
+    simplified = simplified.replace(/(I think|I believe|in my opinion|from my perspective)[^.]*\./gi, '');
+    
+    // Replace markdown bullet points with simpler format
+    simplified = simplified.replace(/\*\s+/g, '• ');
+    
+    // Remove markdown formatting
+    simplified = simplified.replace(/\*\*(.*?)\*\*/g, '$1');
+    simplified = simplified.replace(/\*(.*?)\*/g, '$1');
+    
     // Trim excess whitespace
     simplified = simplified.trim();
     
     // Ensure the response starts with a capital letter
     if (simplified.length > 0) {
       simplified = simplified.charAt(0).toUpperCase() + simplified.slice(1);
+    }
+    
+    // Add specific customer service touch if response is too brief
+    if (simplified.length < 20 && simplified.length > 0) {
+      simplified += " Can I help with anything specific about this?";
     }
     
     return simplified;
@@ -83,7 +101,9 @@ export const useChat = () => {
     try {
       console.log("Sending message to Gemini API...");
       
-      // Updated request format based on user's provided example
+      // Add fashion/cosmetics guidance to the system prompt
+      const contextualizedMessage = `As a fashion and cosmetics support assistant, provide a brief, helpful response to: ${message}`;
+      
       const response = await fetch(`${API_URL}?key=${API_KEY}`, {
         method: 'POST',
         headers: {
@@ -92,15 +112,15 @@ export const useChat = () => {
         body: JSON.stringify({
           contents: [
             {
-              parts: [{ text: message }]
+              parts: [{ text: contextualizedMessage }]
             }
           ],
-          // Optional configuration parameters
+          // Configure for shorter responses
           generation_config: {
-            temperature: 0.7,
+            temperature: 0.5,
             top_k: 40,
             top_p: 0.95,
-            max_output_tokens: 800,
+            max_output_tokens: 300,
           },
           safety_settings: [
             {
@@ -150,7 +170,7 @@ export const useChat = () => {
       }));
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to get response from assistant',
+        description: 'Sorry, we are having trouble connecting. Please try again in a moment.',
         variant: 'destructive',
       });
     } finally {
@@ -165,7 +185,7 @@ export const useChat = () => {
   useEffect(() => {
     if (chatState.messages.length === 0) {
       addMessage(
-        "I'm your fashion and cosmetics assistant. How can I help you today?",
+        "How can I help with your fashion or cosmetic questions today?",
         'assistant'
       );
     }
