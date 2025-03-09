@@ -47,6 +47,28 @@ export const useChat = () => {
     }));
   }, []);
 
+  // Process the AI response to make it more concise
+  const simplifyResponse = (response: string): string => {
+    // Remove any lengthy introductions
+    let simplified = response.replace(/^(Hello!|Hi there!|Greetings!|Sure,|Of course,|Certainly,)[^.]*\./i, '');
+    
+    // Remove phrases like "I'd be happy to help you with..."
+    simplified = simplified.replace(/(I'd be happy to|I'd love to|I'd be glad to|I can certainly|Let me|I'm happy to) (help|assist|provide|explain|address)[^.]*\./gi, '');
+    
+    // Remove excessive sign-offs
+    simplified = simplified.replace(/(Is there anything else|Do you have any other questions|Let me know if you need|Feel free to ask)[^.]*\.$/gi, '');
+    
+    // Trim excess whitespace
+    simplified = simplified.trim();
+    
+    // Ensure the response starts with a capital letter
+    if (simplified.length > 0) {
+      simplified = simplified.charAt(0).toUpperCase() + simplified.slice(1);
+    }
+    
+    return simplified;
+  };
+
   // Send a message to the API
   const sendMessage = useCallback(async (message: string) => {
     // Add user message to state
@@ -114,7 +136,9 @@ export const useChat = () => {
       
       if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
         const botResponse = data.candidates[0].content.parts[0].text;
-        addMessage(botResponse, 'assistant');
+        // Apply simplification to the bot response
+        const simplifiedResponse = simplifyResponse(botResponse);
+        addMessage(simplifiedResponse, 'assistant');
       } else {
         throw new Error('Invalid response format from API');
       }
@@ -135,13 +159,13 @@ export const useChat = () => {
         isLoading: false,
       }));
     }
-  }, [chatState.messages, addMessage]);
+  }, [addMessage]);
 
-  // Initialize with a welcome message
+  // Initialize with a simplified welcome message
   useEffect(() => {
     if (chatState.messages.length === 0) {
       addMessage(
-        "Hello! I'm your fashion and cosmetics assistant. How can I help you today? Feel free to ask about fashion trends, makeup products, skincare routines, or any other beauty-related questions!",
+        "I'm your fashion and cosmetics assistant. How can I help you today?",
         'assistant'
       );
     }
