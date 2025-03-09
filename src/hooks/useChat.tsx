@@ -15,9 +15,9 @@ export type ChatState = {
   error: string | null;
 };
 
-// Updated API URL and model name to use the correct endpoint
+// Updated API URL to use gemini-2.0-flash as specified in the user's request
 const API_KEY = 'AIzaSyCznpxXJOb4zPeU3aSxGFL3si7MtbbPYTs';
-const API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent';
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 export const useChat = () => {
   const [chatState, setChatState] = useState<ChatState>({
@@ -61,7 +61,7 @@ export const useChat = () => {
     try {
       console.log("Sending message to Gemini API...");
       
-      // Updated request format to match the current Gemini API
+      // Updated request format based on user's provided example
       const response = await fetch(`${API_URL}?key=${API_KEY}`, {
         method: 'POST',
         headers: {
@@ -70,10 +70,10 @@ export const useChat = () => {
         body: JSON.stringify({
           contents: [
             {
-              role: "user",
               parts: [{ text: message }]
             }
           ],
+          // Optional configuration parameters
           generation_config: {
             temperature: 0.7,
             top_k: 40,
@@ -97,10 +97,7 @@ export const useChat = () => {
               category: "HARM_CATEGORY_DANGEROUS_CONTENT",
               threshold: "BLOCK_MEDIUM_AND_ABOVE"
             }
-          ],
-          system_instruction: {
-            parts: [{ text: "You are a helpful fashion and cosmetics assistant. Provide detailed and accurate information about fashion trends, clothing styles, makeup products, skincare routines, and beauty advice. Be conversational, friendly, and helpful." }]
-          }
+          ]
         }),
       });
 
