@@ -15,8 +15,9 @@ export type ChatState = {
   error: string | null;
 };
 
+// Updated API URL and model name to use the correct endpoint
 const API_KEY = 'AIzaSyCznpxXJOb4zPeU3aSxGFL3si7MtbbPYTs';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent';
 
 export const useChat = () => {
   const [chatState, setChatState] = useState<ChatState>({
@@ -58,15 +59,9 @@ export const useChat = () => {
     }));
 
     try {
-      // Create history context for the API
-      const history = chatState.messages.map(msg => ({
-        role: msg.role,
-        parts: [{ text: msg.content }]
-      }));
+      console.log("Sending message to Gemini API...");
       
-      // Add fashion and cosmetics context
-      const fashionContext = "You are a helpful fashion and cosmetics assistant. Provide detailed and accurate information about fashion trends, clothing styles, makeup products, skincare routines, and beauty advice. Be conversational, friendly, and helpful.";
-      
+      // Updated request format to match the current Gemini API
       const response = await fetch(`${API_URL}?key=${API_KEY}`, {
         method: 'POST',
         headers: {
@@ -74,29 +69,51 @@ export const useChat = () => {
         },
         body: JSON.stringify({
           contents: [
-            ...history,
             {
               role: "user",
               parts: [{ text: message }]
             }
           ],
-          systemInstruction: {
-            parts: [{ text: fashionContext }]
-          },
-          generationConfig: {
+          generation_config: {
             temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 800,
+            top_k: 40,
+            top_p: 0.95,
+            max_output_tokens: 800,
           },
+          safety_settings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ],
+          system_instruction: {
+            parts: [{ text: "You are a helpful fashion and cosmetics assistant. Provide detailed and accurate information about fashion trends, clothing styles, makeup products, skincare routines, and beauty advice. Be conversational, friendly, and helpful." }]
+          }
         }),
       });
 
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        const errorData = await response.json();
+        console.error("API error details:", errorData);
+        throw new Error(`API request failed with status ${response.status}: ${errorData?.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      console.log("API response data:", data);
       
       if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
         const botResponse = data.candidates[0].content.parts[0].text;
