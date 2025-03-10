@@ -1,81 +1,136 @@
 
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import ChatBot from "@/components/ChatBot";
+import { Card } from "@/components/ui/card";
+import { Upload, Camera, ArrowRight } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import ImageUploader from "@/components/ImageUploader";
+import WebcamCapture from "@/components/WebcamCapture";
+import SampleImages from "@/components/SampleImages";
+import Navbar from "@/components/Navbar";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [image, setImage] = useState<string | null>(null);
+  const [showWebcam, setShowWebcam] = useState(false);
+  
+  const handleImageSelected = useCallback((imageUrl: string) => {
+    setImage(imageUrl);
+    toast({
+      title: "Image selected",
+      description: "Your image is ready for analysis",
+    });
+  }, []);
+  
+  const handleWebcamCapture = useCallback((capturedImage: string) => {
+    setImage(capturedImage);
+    setShowWebcam(false);
+    toast({
+      title: "Image captured",
+      description: "Your photo is ready for analysis",
+    });
+  }, []);
+  
+  const handleContinue = useCallback(() => {
+    if (image) {
+      // Store image in sessionStorage to pass between routes
+      sessionStorage.setItem("analysisImage", image);
+      navigate("/analysis");
+    } else {
+      toast({
+        title: "No image selected",
+        description: "Please upload an image or take a photo first",
+        variant: "destructive",
+      });
+    }
+  }, [image, navigate]);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background to-background/90 -z-10"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-15 -z-20"></div>
-        
-        <div className="container px-4 md:px-6 flex flex-col items-center text-center z-10">
-          <span className="inline-block px-3 py-1 mb-6 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full">
-            FASHION & BEAUTY EXPERTISE
-          </span>
-          <h1 className="text-4xl md:text-6xl font-display font-medium tracking-tight mb-6 animate-fade-in">
-            Elevate Your Style Journey
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+      <Navbar />
+      
+      <main className="container px-4 py-12 mx-auto">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl font-display font-medium tracking-tight mb-6">
+            Facial Analysis & Virtual Makeover
           </h1>
-          <p className="max-w-[600px] text-muted-foreground text-lg mb-10 animate-fade-in delay-100">
-            Discover curated fashion collections and beauty products that reflect your unique style. Our expert consultants are here to guide you.
+          <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto">
+            Analyze your face shape, try on virtual makeup, and experiment with hair colors
+            using our AI-powered platform.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 animate-fade-in delay-200">
-            <Button size="lg" className="rounded-full px-8">
-              Explore Collections
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-8">
-              Book Consultation
-            </Button>
-          </div>
           
-          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-pulse">
-            <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 border border-border">
-              <ChevronDown className="h-6 w-6" />
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Simple content section to demonstrate the page */}
-      <section className="py-20 bg-secondary/30">
-        <div className="container px-4 md:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-medium tracking-tight mb-4">
-              Our Premium Services
-            </h2>
-            <p className="max-w-[600px] mx-auto text-muted-foreground">
-              Personalized experiences tailored to elevate your style and beauty routine.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Personal Styling",
-                description: "Curated fashion recommendations based on your preferences and body type."
-              },
-              {
-                title: "Makeup Consultation",
-                description: "Professional advice on products and techniques that enhance your natural beauty."
-              },
-              {
-                title: "Skincare Analysis",
-                description: "Customized skincare routines designed for your specific skin concerns."
-              }
-            ].map((service, index) => (
-              <div key={index} className="bg-background/80 backdrop-blur-sm p-6 rounded-xl border border-border shadow-sm">
-                <h3 className="text-xl font-medium mb-3">{service.title}</h3>
-                <p className="text-muted-foreground">{service.description}</p>
+          <div className="grid gap-8">
+            {!showWebcam && !image && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="p-6 flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full"
+                    onClick={() => setShowWebcam(false)}
+                  >
+                    <Upload className="mr-2 h-5 w-5" />
+                    Upload Image
+                  </Button>
+                  <ImageUploader onImageSelected={handleImageSelected} />
+                </Card>
+                
+                <Card className="p-6 flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full"
+                    onClick={() => setShowWebcam(true)}
+                  >
+                    <Camera className="mr-2 h-5 w-5" />
+                    Take Photo
+                  </Button>
+                </Card>
               </div>
-            ))}
+            )}
+            
+            {showWebcam && !image && (
+              <Card className="p-6">
+                <WebcamCapture onCapture={handleWebcamCapture} onCancel={() => setShowWebcam(false)} />
+              </Card>
+            )}
+            
+            {image && (
+              <div className="flex flex-col items-center">
+                <div className="max-w-md mb-6">
+                  <img 
+                    src={image} 
+                    alt="Preview" 
+                    className="w-full h-auto rounded-lg shadow-md" 
+                  />
+                </div>
+                
+                <div className="flex gap-4">
+                  <Button variant="outline" onClick={() => {
+                    setImage(null);
+                    setShowWebcam(false);
+                  }}>
+                    Choose Another
+                  </Button>
+                  
+                  <Button onClick={handleContinue}>
+                    Continue
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {!image && (
+              <div className="mt-10">
+                <h2 className="text-xl font-medium mb-6">Or try with a sample image</h2>
+                <SampleImages onSelectSample={handleImageSelected} />
+              </div>
+            )}
           </div>
         </div>
-      </section>
-
-      {/* Chatbot */}
-      <ChatBot initialOpen={false} />
+      </main>
     </div>
   );
 };
