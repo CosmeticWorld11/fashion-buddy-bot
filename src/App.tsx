@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import FacialAnalysis from "./pages/FacialAnalysis";
 import EditImage from "./pages/EditImage";
 import Preview from "./pages/Preview";
+import ChatBot from "./components/ChatBot";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => {
           </Routes>
           <Toaster />
           <Sonner />
+          <ChatBot initialOpen={false} />
         </TooltipProvider>
       </BrowserRouter>
     </QueryClientProvider>
