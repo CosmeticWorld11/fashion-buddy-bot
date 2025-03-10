@@ -12,7 +12,7 @@ interface ChatBotProps {
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ initialOpen = false }) => {
-  const { messages, isLoading, sendMessage, resetMessages } = useChat();
+  const { messages, isLoading, isTyping, sendMessage, resetMessages } = useChat();
   const [isOpen, setIsOpen] = React.useState(initialOpen);
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [isConversationStarted, setIsConversationStarted] = React.useState(false);
@@ -116,7 +116,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ initialOpen = false }) => {
               <ChatMessage key={message.id} message={message} />
             ))}
             
-            {isLoading && (
+            {(isLoading || isTyping) && (
               <div className="flex items-start gap-3 mb-4 animate-slide-in">
                 <div className="w-8 h-8 rounded-full bg-secondary border border-border shadow-sm flex items-center justify-center">
                   <span className="text-xs font-semibold">AI</span>
@@ -134,7 +134,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ initialOpen = false }) => {
           </div>
 
           {/* Input */}
-          <ChatInput onSendMessage={sendMessage} isLoading={isLoading} />
+          <ChatInput onSendMessage={sendMessage} isLoading={isLoading || isTyping} />
         </>
       )}
     </div>

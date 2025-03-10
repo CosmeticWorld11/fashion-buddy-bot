@@ -9,5 +9,6 @@ export type Message = {
 export type ChatState = {
   messages: Message[];
   isLoading: boolean;
+  isTyping?: boolean;
   error: string | null;
 };

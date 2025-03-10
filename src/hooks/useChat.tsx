@@ -11,6 +11,7 @@ export const useChat = () => {
     messages: [],
     isLoading: false,
     error: null,
+    isTyping: false,
   });
 
   // Add a message to the chat
@@ -45,6 +46,55 @@ export const useChat = () => {
     }));
   }, []);
 
+  // Simulate typing animation for assistant messages
+  const simulateTyping = useCallback(async (message: string) => {
+    setChatState((prevState) => ({
+      ...prevState,
+      isTyping: true,
+    }));
+
+    // Create a temporary message with empty content that will be filled gradually
+    const messageId = generateId();
+    setChatState((prevState) => ({
+      ...prevState,
+      messages: [
+        ...prevState.messages,
+        {
+          id: messageId,
+          content: '',
+          role: 'assistant',
+          timestamp: new Date(),
+        },
+      ],
+    }));
+
+    // Split the message into characters for typing animation
+    const characters = message.split('');
+    
+    // Gradually add characters to simulate typing
+    let currentText = '';
+    for (let i = 0; i < characters.length; i++) {
+      currentText += characters[i];
+      
+      setChatState((prevState) => ({
+        ...prevState,
+        messages: prevState.messages.map(msg => 
+          msg.id === messageId
+            ? { ...msg, content: currentText }
+            : msg
+        ),
+      }));
+      
+      // Random delay between 15-45ms for a more natural typing effect
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 30 + 15));
+    }
+    
+    setChatState((prevState) => ({
+      ...prevState,
+      isTyping: false,
+    }));
+  }, []);
+
   // Send a message to the API
   const sendMessage = useCallback(async (message: string) => {
     // Add user message to state
@@ -59,7 +109,8 @@ export const useChat = () => {
     try {
       const botResponse = await sendMessageToAPI(message);
       const simplifiedResponse = simplifyResponse(botResponse);
-      addMessage(simplifiedResponse, 'assistant');
+      // Instead of immediately adding the message, simulate typing
+      await simulateTyping(simplifiedResponse);
     } catch (error) {
       const errorMessage = handleApiError(error);
       setChatState((prevState) => ({
@@ -72,7 +123,7 @@ export const useChat = () => {
         isLoading: false,
       }));
     }
-  }, [addMessage]);
+  }, [addMessage, simulateTyping]);
 
   // Initialize with a welcome message
   useEffect(() => {
@@ -84,6 +135,7 @@ export const useChat = () => {
   return {
     messages: chatState.messages,
     isLoading: chatState.isLoading,
+    isTyping: chatState.isTyping,
     error: chatState.error,
     sendMessage,
     resetMessages,
