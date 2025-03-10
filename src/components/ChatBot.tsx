@@ -4,7 +4,7 @@ import { useChat } from '@/hooks/useChat';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import { Button } from '@/components/ui/button';
-import { X, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Minimize2, Maximize2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChatBotProps {
@@ -12,9 +12,10 @@ interface ChatBotProps {
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ initialOpen = false }) => {
-  const { messages, isLoading, sendMessage } = useChat();
+  const { messages, isLoading, sendMessage, resetMessages } = useChat();
   const [isOpen, setIsOpen] = React.useState(initialOpen);
   const [isMinimized, setIsMinimized] = React.useState(false);
+  const [isConversationStarted, setIsConversationStarted] = React.useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const toggleChat = () => {
@@ -29,6 +30,18 @@ const ChatBot: React.FC<ChatBotProps> = ({ initialOpen = false }) => {
     e.stopPropagation();
     setIsMinimized(!isMinimized);
   };
+
+  const handleBackButton = () => {
+    resetMessages();
+    setIsConversationStarted(false);
+  };
+
+  // Mark conversation as started when user sends a message
+  useEffect(() => {
+    if (messages.length > 1) {
+      setIsConversationStarted(true);
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (messagesEndRef.current && !isMinimized) {
@@ -62,6 +75,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ initialOpen = false }) => {
         onClick={isMinimized ? toggleChat : undefined}
       >
         <div className="flex items-center gap-2">
+          {isConversationStarted && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="w-6 h-6 rounded-full mr-1"
+              onClick={handleBackButton}
+            >
+              <ArrowLeft className="h-3 w-3" />
+            </Button>
+          )}
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
           <h3 className="text-sm font-medium">Fashion Advisor</h3>
         </div>

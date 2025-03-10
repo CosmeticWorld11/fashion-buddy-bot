@@ -47,39 +47,46 @@ export const useChat = () => {
     }));
   }, []);
 
+  // Reset messages to initial state
+  const resetMessages = useCallback(() => {
+    setChatState((prevState) => ({
+      ...prevState,
+      messages: [
+        {
+          id: generateId(),
+          content: "How can I help with your fashion or cosmetic questions today?",
+          role: 'assistant',
+          timestamp: new Date(),
+        }
+      ],
+      error: null,
+    }));
+  }, []);
+
   // Process the AI response to make it more concise and customer support-like
   const simplifyResponse = (response: string): string => {
     // Remove any lengthy introductions
     let simplified = response.replace(/^(Hello!|Hi there!|Greetings!|Sure,|Of course,|Certainly,)[^.]*\./i, '');
     
-    // Remove phrases like "I'd be happy to help you with..."
     simplified = simplified.replace(/(I'd be happy to|I'd love to|I'd be glad to|I can certainly|Let me|I'm happy to) (help|assist|provide|explain|address)[^.]*\./gi, '');
     
-    // Remove excessive sign-offs
     simplified = simplified.replace(/(Is there anything else|Do you have any other questions|Let me know if you need|Feel free to ask)[^.]*\.$/gi, '');
     
-    // Remove explanatory phrasing
     simplified = simplified.replace(/(let me explain|to explain|I'll explain|as you know|as you may know|it's worth noting that|it's important to note that)[^.]*\./gi, '');
     
-    // Remove first-person perspective
     simplified = simplified.replace(/(I think|I believe|in my opinion|from my perspective)[^.]*\./gi, '');
     
-    // Replace markdown bullet points with simpler format
     simplified = simplified.replace(/\*\s+/g, '• ');
     
-    // Remove markdown formatting
     simplified = simplified.replace(/\*\*(.*?)\*\*/g, '$1');
     simplified = simplified.replace(/\*(.*?)\*/g, '$1');
     
-    // Trim excess whitespace
     simplified = simplified.trim();
     
-    // Ensure the response starts with a capital letter
     if (simplified.length > 0) {
       simplified = simplified.charAt(0).toUpperCase() + simplified.slice(1);
     }
     
-    // Add specific customer service touch if response is too brief
     if (simplified.length < 20 && simplified.length > 0) {
       simplified += " Can I help with anything specific about this?";
     }
@@ -101,7 +108,6 @@ export const useChat = () => {
     try {
       console.log("Sending message to Gemini API...");
       
-      // Add fashion/cosmetics guidance to the system prompt
       const contextualizedMessage = `As a fashion and cosmetics support assistant, provide a brief, helpful response to: ${message}`;
       
       const response = await fetch(`${API_URL}?key=${API_KEY}`, {
@@ -115,7 +121,6 @@ export const useChat = () => {
               parts: [{ text: contextualizedMessage }]
             }
           ],
-          // Configure for shorter responses
           generation_config: {
             temperature: 0.5,
             top_k: 40,
@@ -156,7 +161,6 @@ export const useChat = () => {
       
       if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
         const botResponse = data.candidates[0].content.parts[0].text;
-        // Apply simplification to the bot response
         const simplifiedResponse = simplifyResponse(botResponse);
         addMessage(simplifiedResponse, 'assistant');
       } else {
@@ -196,5 +200,6 @@ export const useChat = () => {
     isLoading: chatState.isLoading,
     error: chatState.error,
     sendMessage,
+    resetMessages,
   };
 };
