@@ -19,7 +19,7 @@ const SampleImages: React.FC<SampleImagesProps> = ({ onSelectSample }) => {
     },
     {
       id: 3,
-      url: "/lovable-uploads/b5cbf11b-0493-48e9-8a32-0bca69ea1b39.png",
+      url: "/lovable-uploads/8ba0e3ac-d8e8-4c5b-976d-26405758e92a.png",
       alt: "Sample face 3",
     },
     {
