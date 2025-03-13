@@ -9,32 +9,32 @@ const SampleImages: React.FC<SampleImagesProps> = ({ onSelectSample }) => {
   const samples = [
     {
       id: 1,
-      url: "/lovable-uploads/8b55faa7-69cb-413b-bbe9-003441301c7a.png",
+      url: "/lovable-uploads/e73d3c23-c84c-4ac5-b21a-479591596b9e.png",
       alt: "Sample face 1",
     },
     {
       id: 2,
-      url: "/lovable-uploads/cf828c8e-c9cd-473c-9672-b80b2b54a352.png",
+      url: "/lovable-uploads/cc2db866-001e-48e7-aab1-d371f1498bfe.png",
       alt: "Sample face 2",
     },
     {
       id: 3,
-      url: "/lovable-uploads/47af077d-80aa-4d52-81ad-2d6da5caffb1.png",
+      url: "/lovable-uploads/b5cbf11b-0493-48e9-8a32-0bca69ea1b39.png",
       alt: "Sample face 3",
     },
     {
       id: 4,
-      url: "/lovable-uploads/491b4b2f-6fe1-47ba-bfcf-faf1f3b0ce20.png",
+      url: "/lovable-uploads/c4e8d067-4753-42f9-b4cf-7a760ca80572.png",
       alt: "Sample face 4",
     },
     {
       id: 5,
-      url: "/lovable-uploads/64f883e3-ece7-4273-ab8d-345c3a9a8d4e.png",
+      url: "/lovable-uploads/d71d3170-318b-408b-8815-852eec52cd2b.png",
       alt: "Sample face 5",
     },
     {
       id: 6,
-      url: "/lovable-uploads/3699828c-be48-4fdc-9a02-9d99e54da30d.png",
+      url: "/lovable-uploads/92918e30-b37a-4585-b79b-8b9e09fca9c7.png",
       alt: "Sample face 6",
     },
   ];
